@@ -1,0 +1,15 @@
+apiVersion: aem.xumak.io/v1beta1
+kind: AEMDeployment
+metadata:
+  name: dev
+spec:
+  authors:
+    type: small
+    replicas: 1
+  publishers:
+    type: small
+    replicas: 1
+  dispatchers:
+    type: small
+    replicas: 1
+  version: "6.3"

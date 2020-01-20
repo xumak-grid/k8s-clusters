@@ -1,0 +1,89 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: grid-dashboard-oauth-proxy
+  name: grid-dashboard-oauth-proxy
+  namespace: bedrock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: grid-dashboard-oauth-proxy
+  template:
+    metadata:
+      labels:
+        run: grid-dashboard-oauth-proxy
+    spec:
+      containers:
+      - args:
+        - --cookie-secure=false
+        - --provider=github
+        - --upstream=
+        - --http-address=0.0.0.0:8080
+        - --redirect-url=
+        - --email-domain=xumak.com
+        - --github-org=xumak-grid
+        - --pass-basic-auth=false
+        - --pass-access-token=false
+        env:
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: cookie
+              name: grid-dashboard-oauth-secrets
+        - name: OAUTH2_PROXY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              key: client-id
+              name: grid-dashboard-oauth-secrets
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: client-secret
+              name: grid-dashboard-oauth-secrets
+        image: a5huynh/oauth2_proxy:2.2
+        name: oauth-proxy
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: grid-dashboard-oauth-proxy
+  name: grid-dashboard-oauth-proxy
+  namespace: bedrock
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: grid-dashboard-oauth-proxy
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: k8s-dashboard-ingress
+  namespace: bedrock
+  annotations:
+    kubernetes.io/ingress.class: "contour"
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  rules:
+  - host: dashboard.test.grid.io
+    http:
+      paths:
+      - backend:
+          serviceName: grid-dashboard-oauth-proxy
+          servicePort: 8080
+        path: /
+  tls:
+  - hosts:
+    - dashboard.test.grid.io
+    secretName: grid-public-tls

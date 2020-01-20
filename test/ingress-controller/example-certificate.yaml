@@ -1,0 +1,20 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: grid-account-certificate
+  namespace: test-deployment
+spec:
+  secretName: grid-public-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod-dns
+  commonName: '*.test.grid.xumak.io'
+  dnsNames:
+  - test.grid.xumak.io
+  acme:
+    config:
+    - dns01:
+        provider: prod-dns
+      domains:
+      - '*.test.grid.xumak.io'
+      - test.grid.xumak.io

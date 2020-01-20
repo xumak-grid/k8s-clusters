@@ -1,0 +1,44 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: aem-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aem-operator
+subjects:
+- kind: ServiceAccount
+  name: aem-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: aem-operator
+rules:
+- apiGroups:
+  - aem.xumak.io
+  resources:
+  - aemdeployments
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - configmaps
+  - secrets
+  - services
+  - persistentvolumeclaims
+  - persistentvolumes
+  - namespaces
+  - poddisruptionbudgets
+  verbs:
+  - "*"
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - update
+  - delete
